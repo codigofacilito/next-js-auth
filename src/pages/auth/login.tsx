@@ -1,11 +1,20 @@
 import Image from "next/image";
 import { useState } from "react";
+import { signIn, useSession, getSession } from "next-auth/react";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { data } = useSession();
 
-    const handleSubmitForm = () => {};
+    const handleSubmitForm = (evt: { preventDefault: () => void; }) => {
+        evt.preventDefault();
+
+        signIn('credentials', {
+            email,
+            password
+        });
+    };
 
     return (
         <div className="flex w-full h-screen bg-white">
@@ -38,5 +47,20 @@ const Login = () => {
       </div>
     );
 };
+
+export async function getServerSideProps(context: { req: any; }) {
+    const { req } = context;
+    const session = await getSession({ req });
+
+    console.log(session);
+
+    if (session) {
+        return {
+            redirect: { destination: "/" }
+        }
+    }
+
+    return { props: {}};
+}
 
 export default Login;

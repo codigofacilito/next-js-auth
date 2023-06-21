@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const SignUp = () => {
     const [email, setEmail] = useState<string>('');
@@ -10,8 +11,41 @@ const SignUp = () => {
     const [address, setAddress] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const { replace } = useRouter();
 
-    const handleSubmitForm = () => {};
+    const handleSubmitForm = async (evt: { preventDefault: () => void; }) => {
+        evt.preventDefault();
+
+        if (password !== confirmPassword) {
+            console.log('Passwords do not match');
+            return;
+        }
+
+        try {
+            const result = await fetch("http://localhost:3000/api/auth/signup", {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    name,
+                    lastName,
+                    phone,
+                    address
+                })
+            });
+
+            const response = await result.json();
+
+            if (response && result.status === 200) {
+                replace('/auth/login');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <div className="flex w-full h-screen bg-white">
